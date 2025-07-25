@@ -64,6 +64,3 @@ jobs:
             export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
             export RABBITMQ_URL="${{ secrets.RABBITMQ_URL }}"
             export broker_queue_email_name="default.email"
-            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
-
-#
