@@ -20,7 +20,7 @@ jobs:
 
       - name: Gerar application.properties
         run: |
-          cat <<EOF > mail-service/src/main/resources/application.properties
+          cat <<EOF > mail/src/main/resources/application.properties
           server.port=8081
           spring.application.name=mail
           spring.jpa.hibernate.ddl-auto=update
