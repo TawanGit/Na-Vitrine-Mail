@@ -20,27 +20,25 @@ jobs:
 
       - name: Gerar application.properties
         run: |
-              mkdir -p src/main/resources
-              cat <<EOF > src/main/resources/application.properties
-              server.port=8081
-              spring.application.name=mail
-              spring.jpa.hibernate.ddl-auto=update
-              spring.datasource.url=${{ secrets.DB_URL }}
-              spring.datasource.username=${{ secrets.DB_USERNAME }}
-              spring.datasource.password=${{ secrets.DB_PASSWORD }}
-              spring.datasource.driver-class-name=org.hibernate.dialect.PostgreSQLDialect
-              spring.jpa.show-sql=true
-              
-              spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}
-              broker.queue.email.name=default.email
-              
-              spring.mail.host=smtp.gmail.com
-              spring.mail.port=587
-              spring.mail.username=${{ secrets.MAIL_USERNAME }}
-              spring.mail.password=${{ secrets.MAIL_PASSWORD }}
-              spring.mail.properties.mail.smtp.auth=true
-              spring.mail.properties.mail.smtp.starttls.enable=true
-              EOF
+          mkdir -p src/main/resources
+          echo "server.port=8081" > src/main/resources/application.properties
+          echo "spring.application.name=mail" >> src/main/resources/application.properties
+          echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties
+          echo "spring.datasource.url=${{ secrets.DB_URL }}" >> src/main/resources/application.properties
+          echo "spring.datasource.username=${{ secrets.DB_USERNAME }}" >> src/main/resources/application.properties
+          echo "spring.datasource.password=${{ secrets.DB_PASSWORD }}" >> src/main/resources/application.properties
+          echo "spring.datasource.driver-class-name=org.postgresql.Driver" >> src/main/resources/application.properties
+          echo "spring.jpa.show-sql=true" >> src/main/resources/application.properties
+          echo "" >> src/main/resources/application.properties
+          echo "spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}" >> src/main/resources/application.properties
+          echo "broker.queue.email.name=default.email" >> src/main/resources/application.properties
+          echo "" >> src/main/resources/application.properties
+          echo "spring.mail.host=smtp.gmail.com" >> src/main/resources/application.properties
+          echo "spring.mail.port=587" >> src/main/resources/application.properties
+          echo "spring.mail.username=${{ secrets.MAIL_USERNAME }}" >> src/main/resources/application.properties
+          echo "spring.mail.password=${{ secrets.MAIL_PASSWORD }}" >> src/main/resources/application.properties
+          echo "spring.mail.properties.mail.smtp.auth=true" >> src/main/resources/application.properties
+          echo "spring.mail.properties.mail.smtp.starttls.enable=true" >> src/main/resources/application.properties
 
       - name: Build com Maven
         run: mvn clean package -DskipTests
