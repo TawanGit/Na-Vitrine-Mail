@@ -8,7 +8,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      DB_URL: ${{ secrets.DB_URL }}
+      DB_URL: ${{ secrets.DB_URL_MAIL }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
