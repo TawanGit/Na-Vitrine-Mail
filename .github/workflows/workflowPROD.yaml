@@ -65,7 +65,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: mail/target/*.jar
+          source: target/*.jar
           target: ~/mail/
 
       - name: Reiniciar aplicação remotamente
