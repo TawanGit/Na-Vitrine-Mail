@@ -51,4 +51,19 @@ jobs:
           source: target/*.jar
           target: ~/mail/
 
+      - name: Rodar aplicação no servidor
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            export DB_URL="${{ secrets.DB_URL }}"
+            export DB_USERNAME="${{ secrets.DB_USERNAME }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export RABBITMQ_URL="${{ secrets.RABBITMQ_URL }}"
+            export broker_queue_email_name="default.email"
+            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
+
 #
