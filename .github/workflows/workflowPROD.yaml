@@ -30,10 +30,10 @@ jobs:
           spring.datasource.password=${{ secrets.DB_PASSWORD }}
           spring.datasource.driver-class-name=org.postgresql.Driver
           spring.jpa.show-sql=true
-  
+          
           spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}
           broker.queue.email.name=default.email
-  
+          
           spring.mail.host=smtp.gmail.com
           spring.mail.port=587
           spring.mail.username=${{ secrets.MAIL_USERNAME }}
@@ -42,41 +42,39 @@ jobs:
           spring.mail.properties.mail.smtp.starttls.enable=true
           EOF
 
-          - name: Build com Maven
-            run: mvn clean package -DskipTests
-        
-          - name: Listar arquivos no target
-            run: ls -l mail/target/
-        
-          - name: Preparar servidor
-            uses: appleboy/ssh-action@v0.1.9
-            with:
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USER }}
-              key: ${{ secrets.SSH_PRIVATE_KEY }}
-              port: 22
-              script: |
-                mkdir -p ~/mail
-                rm -rf ~/mail/target
-                rm -f ~/mail/mail.jar
-        
-          - name: Copiar .jar para o servidor
-            uses: appleboy/scp-action@v0.1.4
-            with:
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USER }}
-              key: ${{ secrets.SSH_PRIVATE_KEY }}
-              port: 22
-              source: mail/target/*.jar
-              target: ~/mail/
-        
-          - name: Reiniciar aplicação remotamente
-            uses: appleboy/ssh-action@v0.1.9
-            with:
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USER }}
-              key: ${{ secrets.SSH_PRIVATE_KEY }}
-              port: 22
-              script: |
-                pkill -f 'java -jar' || true
-                nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
+      - name: Build com Maven
+        run: mvn -f mail/pom.xml clean package -DskipTests
+
+      - name: Preparar servidor
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # Criar pasta e apagar target anterior (se existir)
+            mkdir -p ~/mail
+            rm -rf ~/mail/target
+            rm -f ~/mail/mail.jar
+
+      - name: Copiar .jar para o servidor
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: mail/target/*.jar
+          target: ~/mail/
+
+      - name: Reiniciar aplicação remotamente
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            pkill -f 'java -jar' || true
+            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
