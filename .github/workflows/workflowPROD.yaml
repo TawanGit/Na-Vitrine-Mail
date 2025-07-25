@@ -20,6 +20,7 @@ jobs:
 
       - name: Gerar application.properties
         run: |
+          mkdir -p mail/src/main/resources
           cat <<EOF > mail/src/main/resources/application.properties
           server.port=8081
           spring.application.name=mail
@@ -29,10 +30,10 @@ jobs:
           spring.datasource.password=${{ secrets.DB_PASSWORD }}
           spring.datasource.driver-class-name=org.postgresql.Driver
           spring.jpa.show-sql=true
-
+          
           spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}
           broker.queue.email.name=default.email
-
+          
           spring.mail.host=smtp.gmail.com
           spring.mail.port=587
           spring.mail.username=${{ secrets.MAIL_USERNAME }}
