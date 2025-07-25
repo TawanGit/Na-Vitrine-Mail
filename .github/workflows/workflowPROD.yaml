@@ -43,7 +43,7 @@ jobs:
           EOF
 
       - name: Build com Maven
-        run: mvn -f mail/pom.xml clean package -DskipTests
+        run: mvn clean package -DskipTests
 
       - name: Preparar servidor
         uses: appleboy/ssh-action@v0.1.9
