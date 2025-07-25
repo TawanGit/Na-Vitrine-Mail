@@ -20,61 +20,60 @@ jobs:
 
       - name: Gerar application.properties
         run: |
-          mkdir -p mail/src/main/resources
-          cat <<EOF > mail/src/main/resources/application.properties
-          server.port=8081
-          spring.application.name=mail
-          spring.jpa.hibernate.ddl-auto=update
-          spring.datasource.url=${{ secrets.DB_URL }}
-          spring.datasource.username=${{ secrets.DB_USERNAME }}
-          spring.datasource.password=${{ secrets.DB_PASSWORD }}
-          spring.datasource.driver-class-name=org.postgresql.Driver
-          spring.jpa.show-sql=true
+          mkdir -p src/main/resources
+          cat <<EOF > src/main/resources/application.properties
+            server.port=8081
+            spring.application.name=mail
+            spring.jpa.hibernate.ddl-auto=update
+            spring.datasource.url=${{ secrets.DB_URL }}
+            spring.datasource.username=${{ secrets.DB_USERNAME }}
+            spring.datasource.password=${{ secrets.DB_PASSWORD }}
+            spring.datasource.driver-class-name=org.postgresql.Driver
+            spring.jpa.show-sql=true
+            
+            spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}
+            broker.queue.email.name=default.email
+            
+            spring.mail.host=smtp.gmail.com
+            spring.mail.port=587
+            spring.mail.username=${{ secrets.MAIL_USERNAME }}
+            spring.mail.password=${{ secrets.MAIL_PASSWORD }}
+            spring.mail.properties.mail.smtp.auth=true
+            spring.mail.properties.mail.smtp.starttls.enable=true
+            EOF
           
-          spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}
-          broker.queue.email.name=default.email
+          - name: Build com Maven
+            run: mvn clean package -DskipTests
           
-          spring.mail.host=smtp.gmail.com
-          spring.mail.port=587
-          spring.mail.username=${{ secrets.MAIL_USERNAME }}
-          spring.mail.password=${{ secrets.MAIL_PASSWORD }}
-          spring.mail.properties.mail.smtp.auth=true
-          spring.mail.properties.mail.smtp.starttls.enable=true
-          EOF
-
-      - name: Build com Maven
-        run: mvn clean package -DskipTests
-
-      - name: Preparar servidor
-        uses: appleboy/ssh-action@v0.1.9
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            # Criar pasta e apagar target anterior (se existir)
-            mkdir -p ~/mail
-            rm -rf ~/mail/target
-            rm -f ~/mail/mail.jar
-
-      - name: Copiar .jar para o servidor
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          source: target/*.jar
-          target: ~/mail/
-
-      - name: Reiniciar aplicação remotamente
-        uses: appleboy/ssh-action@v0.1.9
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            pkill -f 'java -jar' || true
-            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
+          - name: Preparar servidor
+            uses: appleboy/ssh-action@v0.1.9
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USER }}
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              port: 22
+              script: |
+                mkdir -p ~/mail
+                rm -rf ~/mail/target
+                rm -f ~/mail/mail.jar
+          
+          - name: Copiar .jar para o servidor
+            uses: appleboy/scp-action@v0.1.4
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USER }}
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              port: 22
+              source: target/*.jar
+              target: ~/mail/
+          
+          - name: Reiniciar aplicação remotamente
+            uses: appleboy/ssh-action@v0.1.9
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USER }}
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              port: 22
+              script: |
+                pkill -f 'java -jar' || true
+                nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
