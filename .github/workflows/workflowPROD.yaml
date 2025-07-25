@@ -13,8 +13,8 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
       broker_queue_email_name: "default.email"
-      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-      REMOTE_USER: ${{ secrets.REMOTE_USER }}
+      REMOTE_HOST: ${{ secrets.SSH_HOST }}
+      REMOTE_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
     steps:
       - name: Checkout do código
@@ -25,28 +25,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - name: Gerar application.properties
-        run: |
-          mkdir -p src/main/resources
-          echo "server.port=8081" > src/main/resources/application.properties
-          echo "spring.application.name=mail" >> src/main/resources/application.properties
-          echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties
-          echo "spring.datasource.url=${{ secrets.DB_URL }}" >> src/main/resources/application.properties
-          echo "spring.datasource.username=${{ secrets.DB_USERNAME }}" >> src/main/resources/application.properties
-          echo "spring.datasource.password=${{ secrets.DB_PASSWORD }}" >> src/main/resources/application.properties
-          echo "spring.datasource.driver-class-name=org.postgresql.Driver" >> src/main/resources/application.properties
-          echo "spring.jpa.show-sql=true" >> src/main/resources/application.properties
-          echo "" >> src/main/resources/application.properties
-          echo "spring.rabbitmq.addresses=${{ secrets.RABBITMQ_URL }}" >> src/main/resources/application.properties
-          echo "broker.queue.email.name=default.email" >> src/main/resources/application.properties
-          echo "" >> src/main/resources/application.properties
-          echo "spring.mail.host=smtp.gmail.com" >> src/main/resources/application.properties
-          echo "spring.mail.port=587" >> src/main/resources/application.properties
-          echo "spring.mail.username=${{ secrets.MAIL_USERNAME }}" >> src/main/resources/application.properties
-          echo "spring.mail.password=${{ secrets.MAIL_PASSWORD }}" >> src/main/resources/application.properties
-          echo "spring.mail.properties.mail.smtp.auth=true" >> src/main/resources/application.properties
-          echo "spring.mail.properties.mail.smtp.starttls.enable=true" >> src/main/resources/application.properties
 
       - name: Build com Maven
         run: mvn clean package -DskipTests
@@ -73,13 +51,4 @@ jobs:
           source: target/*.jar
           target: ~/mail/
 
-      - name: Reiniciar aplicação remotamente
-        uses: appleboy/ssh-action@v0.1.9
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            pkill -f 'java -jar' || true
-            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
+#
