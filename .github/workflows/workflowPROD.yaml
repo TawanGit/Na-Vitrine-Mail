@@ -54,9 +54,9 @@ jobs:
           port: 22
           script: |
             # Criar pasta e apagar target anterior (se existir)
-            mkdir -p ~/mail-service
-            rm -rf ~/mail-service/target
-            rm -f ~/mail-service/mail-service.jar
+            mkdir -p ~/mail
+            rm -rf ~/mail/target
+            rm -f ~/mail/mail.jar
 
       - name: Copiar .jar para o servidor
         uses: appleboy/scp-action@v0.1.4
@@ -65,8 +65,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: mail-service/target/*.jar
-          target: ~/mail-service/
+          source: mail/target/*.jar
+          target: ~/mail/
 
       - name: Reiniciar aplicação remotamente
         uses: appleboy/ssh-action@v0.1.9
@@ -77,4 +77,4 @@ jobs:
           port: 22
           script: |
             pkill -f 'java -jar' || true
-            nohup java -jar ~/mail-service/*.jar > ~/mail-service/log.txt 2>&1 &
+            nohup java -jar ~/mail/*.jar > ~/mail/log.txt 2>&1 &
